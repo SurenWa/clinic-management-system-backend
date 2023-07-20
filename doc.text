@@ -1,0 +1,8 @@
+npx nest generate resource  == create resource
+npx prisma migrate dev --name "init" == migrate prisma model changes to db
+npx prisma generate
+npm cache clean --force
+
+restart from 1 again
+first disable in prisma
+TRUNCATE TABLE "Token" RESTART IDENTITY;

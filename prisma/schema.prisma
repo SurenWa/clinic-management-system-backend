@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id                  Int      @id @default(autoincrement())
+    email               String   @unique
+    password            String
+    first_name          String
+    last_name           String
+    phone_number        String?
+    profile_image       String?
+    is_blocked          Boolean  @default(false)
+    is_first_logged     Boolean  @default(true)
+    designation         String?
+    degrees             String?    
+    specialist          String?
+    work_experience     Int?
+    service_place       String?
+    birth_date          DateTime? 
+    refresh_token       String?
+
+    department          Department?  @relation(fields: [department_id], references: [id])
+    department_id       Int       
+    role                Role?    @relation(fields: [role_id], references: [id])
+    role_id             Int 
+    token               Token[]      
+    createdAt           DateTime @default(now())
+    updatedAt           DateTime @updatedAt
+}
+
+model Role {
+    id                  Int    @id @default(autoincrement())
+    role_name           String @unique
+    user                User[]
+    createdAt           DateTime @default(now())
+    updatedAt           DateTime @updatedAt
+}
+
+model Department {
+    id                  Int    @id @default(autoincrement())
+    department_name                String @unique
+    user                User[]
+    createdAt           DateTime @default(now())
+    updatedAt           DateTime @updatedAt
+}
+
+model Token {
+    id                  Int    @id @default(autoincrement())    
+    user                User?    @relation(fields: [user_id], references: [id])
+    user_id             Int
+    token               String
+    createdAt           DateTime @default(now()) 
+}
+
