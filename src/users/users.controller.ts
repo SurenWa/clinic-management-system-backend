@@ -46,6 +46,7 @@ export class UsersController {
     @ApiCreatedResponse()
     @ApiForbiddenResponse({ description: 'Unauthorized Request' })
     create(@Body() createUserDto: CreateUserDto) {
+        console.log(createUserDto);
         return this.usersService.create(createUserDto);
     }
 

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 
 export class ResetPasswordDto {
     @ApiProperty()
@@ -10,6 +11,7 @@ export class ResetPasswordDto {
     @ApiProperty()
     @IsNotEmpty({ message: 'User id is required' })
     @IsNumber()
+    @Type(() => Number)
     userId: number;
 
     @ApiProperty()

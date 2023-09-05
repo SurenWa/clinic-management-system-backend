@@ -12,22 +12,22 @@ import { IsImageFile } from './custom-validator';
 export class CreateUserDto {
     @ApiProperty()
     @IsNotEmpty({ message: 'Email is required' })
-    @IsString({ message: 'Email must be string' })
+    @IsString()
     email: string;
 
     @ApiProperty()
     @IsNotEmpty({ message: 'Password is required' })
-    @IsString({ message: 'Password must be string' })
+    @IsString()
     password: string;
 
     @ApiProperty()
     @IsNotEmpty({ message: 'First name is required' })
-    @IsString({ message: 'First name must be string' })
+    @IsString()
     first_name: string;
 
     @ApiProperty()
     @IsNotEmpty({ message: 'Last name is required' })
-    @IsString({ message: 'Last name must be string' })
+    @IsString()
     last_name: string;
 
     @ApiProperty()

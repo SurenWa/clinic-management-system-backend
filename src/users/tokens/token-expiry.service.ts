@@ -9,7 +9,7 @@ export class TokenExpiryService {
         const expiredTokens = await this.prisma.token.findMany({
             where: {
                 createdAt: {
-                    lte: new Date(Date.now() - 3600000), // Delete tokens older than 1 hour (adjust the duration as needed)
+                    lte: new Date(Date.now() - 24 * 3600000), // Delete tokens older than 1 day (adjust the duration as needed)
                 },
             },
         });

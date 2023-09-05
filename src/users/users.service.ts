@@ -7,6 +7,8 @@ import {
     NotFoundException,
     UnauthorizedException,
     ForbiddenException,
+    BadRequestException,
+    NotAcceptableException,
 } from '@nestjs/common';
 import {
     CreateUserDto,
@@ -64,7 +66,7 @@ export class UsersService {
                 data: { department_name: 'MANAGEMENT' },
             });
 
-            const user = await this.prisma.user.create({
+            await this.prisma.user.create({
                 data: {
                     ...createUserDto,
                     password: hashedPassword,
@@ -73,10 +75,14 @@ export class UsersService {
                 },
             });
 
-            const tokens = await this.getTokens(user.id, user.email);
-            await this.updateRtHash(user.id, tokens.refresh_token);
+            return {
+                message: 'User created successfully',
+            };
 
-            return tokens;
+            // const tokens = await this.getTokens(user.id, user.email);
+            // await this.updateRtHash(user.id, tokens.refresh_token);
+
+            // return tokens;
         } else {
             await this.prisma.user.create({
                 data: {
@@ -124,23 +130,27 @@ export class UsersService {
     }
 
     async logout(userId: number): Promise<boolean> {
-        await this.prisma.user.updateMany({
-            where: {
-                id: userId,
-                refresh_token: {
-                    not: null,
+        try {
+            await this.prisma.user.updateMany({
+                where: {
+                    id: userId,
+                    refresh_token: {
+                        not: null,
+                    },
                 },
-            },
-            data: {
-                refresh_token: null,
-            },
-        });
-        return true;
+                data: {
+                    refresh_token: null,
+                },
+            });
+            return true;
+        } catch (error) {
+            throw new BadRequestException('Logout failed');
+        }
     }
 
     async requestPasswordReset(
         resetPasswordRequestDto: ResetPasswordRequestDto,
-    ): Promise<string> {
+    ): Promise<{ message: string }> {
         const { email } = resetPasswordRequestDto;
         const user = await this.prisma.user.findUnique({
             where: {
@@ -149,7 +159,7 @@ export class UsersService {
         });
 
         if (!user) {
-            throw new NotFoundException(`No user found for email: ${email}`);
+            throw new NotFoundException('Please enter correct email address');
         }
 
         const token = await this.prisma.token.findFirst({
@@ -185,7 +195,10 @@ export class UsersService {
             email,
             link,
         );
-        return link;
+        // return link;
+        return {
+            message: 'Successfully sent password reset link is  to your email.',
+        };
     }
 
     async resetPassword(
@@ -198,7 +211,7 @@ export class UsersService {
         });
 
         if (!passwordResetToken) {
-            throw new NotFoundException(
+            throw new Error(
                 'Invalid or expired password reset token.Please try again',
             );
         }
@@ -206,7 +219,7 @@ export class UsersService {
         const isValid = await argon.verify(passwordResetToken.token, token);
 
         if (!isValid) {
-            throw new NotFoundException(
+            throw new Error(
                 'Invalid or expired password reset token.Please try again',
             );
         }
@@ -245,7 +258,14 @@ export class UsersService {
         const isValidPassword = await argon.verify(user.password, oldPassword);
 
         if (!isValidPassword) {
-            throw new UnauthorizedException('Invalid password');
+            throw new NotAcceptableException('Invalid current password');
+        }
+
+        const isSamePassword = await argon.verify(user.password, newPassword);
+        if (isSamePassword) {
+            throw new NotAcceptableException(
+                'Old Password and new password must be different',
+            );
         }
 
         const newHashedPassword = await argon.hash(newPassword);
@@ -281,7 +301,7 @@ export class UsersService {
             },
         });
         if (!user) {
-            throw new NotFoundException(`Role with ${id} does not exist.`);
+            throw new Error('User not found');
         }
         return new UserEntity(user);
     }

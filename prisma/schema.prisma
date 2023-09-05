@@ -12,12 +12,12 @@ datasource db {
 
 model User {
     id                  Int      @id @default(autoincrement())
-    email               String   @unique
+    email               String?   @unique
     password            String
-    first_name          String
-    last_name           String
+    first_name          String?
+    last_name           String?
     phone_number        String?
-    profile_image       String?
+    profile_image       String?  
     is_blocked          Boolean  @default(false)
     is_first_logged     Boolean  @default(true)
     designation         String?
